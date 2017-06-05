@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Favorite Pokemon</title>
+  <style type="text/css">
+    button,
+    div,
+    form,
+    input {
+      margin: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Pokemon GIF Generator</h1>
+    <p style="font-size: 8px">(and secretly anythign else if you make it a button)</p>
+    <p style="font-size: 5px">(including titties...)</p>
+    <!-- Rendered buttons will get dumped Here  -->
+    <div id="buttons-view"></div>
+
+    <form id="pokemon-form">
+      <label for="pokemon-input">Add a Pokemon, Bro</label>
+      <input type="text" id="pokemon-input"><br>
+
+      <!-- Button triggers new pokemon to be added -->
+      <input id="add-pokemon" type="submit" value="Add a Pokemon, Bro">
+    </form>
+
+    <!-- Movies will get dumped here -->
+    <div id="pokemon-view"></div>
+
+    <script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript">
+      // Initial array of pokemon
+      var pokemonButtons = ["Charizard", "Snorlax", "Mr. Mimes", "Ditto"];
+
+      // displayMovieInfo function re-renders the HTML to display the appropriate content
+      function displayPokemonInfo() {
+        var apiKey = "&apiKey=dc6zaTOxFJmzC";
+        var pokemon = $(this).attr("data-name");
+        var queryURL = "https://api.giphy.com/v1/gifs/search?&limit=10&q=" + pokemon + apiKey;
+
+        // Creates AJAX call for the specific pokemon button being clicked
+        $.ajax({
+          url: queryURL,
+          method: "GET"
+        }).done(function(response) {
+          for (var i = 1; i < response.data.length; i++) {
+            console.log(response);
+            var a  = $("<div>");
+            a.text(response.data[i].rating);
+            a.addClass("rating");
+            console.log(response.data[i].rating);
+
+            var b = $("<img>")
+            b.attr("data-still", response.data[i].images.original_still.url);
+            b.attr("data-gif", response.data[i].images.original.url);
+            b.attr("src", response.data[i].images.original_still.url);
+            a.prepend(b);
+            $("#pokemon-view").prepend(a);
+          }
+        });
+
+      }
+
+      // Function for 'click' playing and pausing GIFs
+      function activateGif() {
+
+        // If the class is "img" it activates the gif url + class = "gif"
+
+            if ($(this).attr("data-still") === $(this).attr("src")) {
+              $(this).attr("src", $(this).attr("data-gif"))
+            }
+            // If the class is "gif" it activates the still url + class = "img"
+            else {
+              $(this).attr("src", $(this).attr("data-still"))
+            }
+      };
+
+      // Function for displaying movie data
+      function renderButtons() {
+
+        // Deletes the movies prior to adding new movies
+        // (this is necessary otherwise you will have repeat buttons)
+        $("#buttons-view").empty();
+
+        // Loops through the array of movies
+        for (var i = 0; i < pokemonButtons.length; i++) {
+
+          // Then dynamicaly generates buttons for each movie in the array
+          // This code $("<button>") is all jQuery needs to create the beginning and end tag. (<button></button>)
+          var a = $("<button>");
+          // Adds a class of movie to our button
+          a.addClass("pokemon");
+          // Added a data-attribute
+          a.attr("data-name", pokemonButtons[i]);
+          // Provided the initial button text
+          a.text(pokemonButtons[i]);
+          // Added the button to the buttons-view div
+          $("#buttons-view").append(a);
+        }
+      }
+
+      // This function handles events where the add movie button is clicked
+      $("#add-pokemon").on("click", function(event) {
+        event.preventDefault();
+        // This line of code will grab the input from the textbox
+        var pokemon = $("#pokemon-input").val().trim();
+
+        // The movie from the textbox is then added to our array
+        pokemonButtons.push(pokemon);
+
+        // Calling renderButtons which handles the processing of our movie array
+        renderButtons();
+
+      });
+
+      // Adding click event listeners to all elements with a class of "pokemon"
+      $(document).on("click", ".pokemon", displayPokemonInfo);
+      $(document).on("click", "img", activateGif);
+
+      // Calling the renderButtons function to display the intial buttons
+      renderButtons();
+    </script>
+  </div>
+</body>
+
+</html>
